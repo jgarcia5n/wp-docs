@@ -1,0 +1,2 @@
+# Build dependencies for the docs site (installed by the GitHub Actions workflow).
+mkdocs-material

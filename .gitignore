@@ -1,0 +1,9 @@
+# MkDocs build output (generated; never commit)
+site/
+
+# Python / tooling
+.cache/
+__pycache__/
+*.pyc
+.venv/
+venv/
