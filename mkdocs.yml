@@ -9,7 +9,7 @@ site_description: Workday HCM, Security, Integrations, Reporting, AI/Agents, and
 # (Update if you set a custom domain.) This drives the absolute URLs in
 # sitemap.xml, which is what Bing -- and therefore the Copilot public-website
 # knowledge source -- crawls. Trailing slash required.
-site_url: https://wd-docs.pages.dev/
+site_url: https://e43e0d04.wp-docs-56b.pages.dev
 
 theme:
   name: material
