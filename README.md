@@ -1,12 +1,14 @@
 # Workday Admin Guide — Public Docs Site
 
-Static site that publishes the `docs/` reference material to GitHub Pages so a
-Microsoft Copilot agent (public-website knowledge source) can ground on it.
+Static site that publishes the `docs/` reference material so a Microsoft Copilot
+agent (public-website knowledge source) can ground on it.
 
-Built with [MkDocs](https://www.mkdocs.org/) + [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/).
+- **Build:** [MkDocs](https://www.mkdocs.org/) + [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/)
+- **Host:** [Cloudflare Pages](https://pages.cloudflare.com/), building from a **private** GitHub repo
+- **Result:** source repo is private/non-searchable; the published website is public (required so Bing/Copilot can read it)
 
-> **Source of truth:** the main workspace's `..\docs` folder. Edit there, then run
-> `sync-docs.ps1` to refresh this publishable copy before pushing. This folder
+> **Source of truth:** the main workspace's `..\docs` folder. Edit there, run
+> `sync-docs.ps1` to refresh this publishable copy, then commit/push. This folder
 > contains **only** publishable Markdown — never copy `CLAUDE.md`, `memory/`, or
 > other internal files here.
 
@@ -16,45 +18,49 @@ Built with [MkDocs](https://www.mkdocs.org/) + [Material for MkDocs](https://squ
 
 | File | Purpose |
 |------|---------|
-| `mkdocs.yml` | Site config + navigation. **Set `site_url` before first deploy.** |
+| `mkdocs.yml` | Site config + navigation. **Set `site_url` to your real `.pages.dev` URL.** |
 | `docs/` | Copy of the 56 Markdown files to publish |
-| `requirements.txt` | Build dependency (`mkdocs-material`) |
-| `.github/workflows/deploy.yml` | Builds and publishes on every push to `main` |
+| `requirements.txt` | Build dependency (`mkdocs-material`) — Cloudflare installs this |
 | `sync-docs.ps1` | Re-copies `..\docs\*.md` into `docs/` |
-| `.gitignore` | Excludes build output |
+| `.gitignore` | Excludes build output (`site/`) |
+
+There is **no** GitHub Actions workflow — Cloudflare Pages runs the build itself.
 
 ---
 
 ## One-time setup
 
-1. **Create a GitHub repository** (e.g. `workday-docs-site`).
-   - Can be **public** or **private**. Either way the *published Pages site* is
-     public — that public URL is what Copilot/Bing needs. (A private repo with a
-     public Pages site is a fine, common setup.)
+### 1. Make the GitHub repo private and push this scaffold
 
-2. **Set `site_url` in `mkdocs.yml`** to your Pages URL:
-   ```
-   site_url: https://<github-username>.github.io/workday-docs-site/
-   ```
-   This makes `sitemap.xml` use correct absolute URLs — important for Bing.
+The repo (`hsdude/wd-docs`) currently holds an earlier file upload at the root.
+This local scaffold has the correct structure (docs under `docs/`, plus config).
 
-3. **Push this folder to the repo:**
-   ```powershell
-   cd "workday-docs-site"
-   git init
-   git branch -M main
-   git remote add origin https://github.com/<github-username>/workday-docs-site.git
-   git add -A
-   git commit -m "Initial docs site"
-   git push -u origin main
-   ```
+- On GitHub: **repo → Settings → General → Danger Zone → Change visibility → Make private.**
+- Then push this folder, overwriting the redundant upload:
+  ```powershell
+  cd "workday-docs-site"
+  git push -u --force-with-lease origin main
+  ```
 
-4. The **Deploy docs site** Action runs automatically and pushes the built HTML
-   to a `gh-pages` branch.
+### 2. Create the Cloudflare Pages project
 
-5. **Enable Pages:** repo **Settings → Pages → Build and deployment → Source =
-   Deploy from a branch → Branch = `gh-pages` / `(root)`** → Save.
-   Your site goes live at the `site_url` above within a minute or two.
+1. Cloudflare dashboard → **Workers & Pages → Create → Pages → Connect to Git.**
+2. Authorize Cloudflare's GitHub app for the **private** `wd-docs` repo.
+3. Build settings:
+   | Setting | Value |
+   |---|---|
+   | Framework preset | None |
+   | Build command | `pip install -r requirements.txt && mkdocs build` |
+   | Build output directory | `site` |
+   | Root directory | *(leave blank — repo root)* |
+4. **Environment variables** → add `PYTHON_VERSION` = `3.12`
+   (Cloudflare's default Python is older and won't build current MkDocs Material.)
+5. **Save and Deploy.** Site goes live at `https://<project-name>.pages.dev/`.
+
+### 3. Point `site_url` at the live URL
+
+Edit `mkdocs.yml` → `site_url:` to match your actual `.pages.dev` domain (or custom
+domain), then commit + push so `sitemap.xml` carries correct absolute URLs.
 
 ---
 
@@ -65,7 +71,7 @@ cd "workday-docs-site"
 pwsh -File .\sync-docs.ps1      # refresh from ..\docs
 git add -A
 git commit -m "Update docs"
-git push                        # Action rebuilds + redeploys
+git push                        # Cloudflare auto-rebuilds + redeploys
 ```
 
 ---
@@ -79,7 +85,7 @@ pip install -r requirements.txt
 mkdocs serve        # http://127.0.0.1:8000
 ```
 
-The cloud build does **not** need local Python — this is only for previewing.
+The Cloudflare build does **not** need local Python — this is only for previewing.
 
 ---
 
@@ -89,12 +95,12 @@ Copilot's public-website source grounds on the **Bing index**, not a live crawl.
 So after the site is live:
 
 1. **Verify the site in [Bing Webmaster Tools](https://www.bing.com/webmasters)**
-   and **submit your sitemap**: `https://<...>/sitemap.xml` (MkDocs generates it
-   automatically). This gets the pages indexed in hours/days instead of weeks.
+   and **submit your sitemap**: `https://<your-domain>/sitemap.xml` (MkDocs
+   generates it automatically). This gets pages indexed in hours/days, not weeks.
 2. In your Copilot agent, add a **public website** knowledge source pointing at
    the **site root URL** (not 56 individual pages) so it can use all subpages.
-3. Re-test grounding a day or two after submitting, once Bing has crawled it.
+3. Re-test grounding a day or two later, once Bing has crawled it.
 
 > Note: `docs/microsoft_teams_slack_faq.md` includes Slack content in its source.
-> If this site is meant to reflect a Teams-only stance, edit that file in the
-> source `..\docs` before syncing.
+> If this site should reflect a Teams-only stance, edit that file in the source
+> `..\docs` before syncing.

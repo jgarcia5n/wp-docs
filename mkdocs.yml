@@ -4,11 +4,12 @@
 site_name: Workday Admin Guide
 site_description: Workday HCM, Security, Integrations, Reporting, AI/Agents, and VNDLY reference (May 2026 / 26R1).
 
-# IMPORTANT: set this to your real GitHub Pages URL once the repo exists.
-# Project site format: https://<github-username>.github.io/<repo-name>/
-# This drives the absolute URLs in sitemap.xml, which is what Bing (and therefore
-# the Copilot public-website knowledge source) crawls. Trailing slash required.
-site_url: https://CHANGE-ME.github.io/workday-docs-site/
+# IMPORTANT: set this to your real Cloudflare Pages URL once the project exists.
+# Default Pages domain: https://<pages-project-name>.pages.dev/
+# (Update if you set a custom domain.) This drives the absolute URLs in
+# sitemap.xml, which is what Bing -- and therefore the Copilot public-website
+# knowledge source -- crawls. Trailing slash required.
+site_url: https://wd-docs.pages.dev/
 
 theme:
   name: material
