@@ -33,4 +33,8 @@ Copy-Item -Path (Join-Path $sourceDocs '*.md') -Destination $siteDocs -Force
 
 $count = (Get-ChildItem -Path $siteDocs -Filter *.md -File | Measure-Object).Count
 Write-Host "Done. $count markdown files in publish folder." -ForegroundColor Green
-Write-Host "Next: git add -A; git commit -m 'Update docs'; git push" -ForegroundColor Green
+Write-Host "Next:" -ForegroundColor Green
+Write-Host "  1. git add -A; git commit -m 'Update docs'; git push" -ForegroundColor Green
+Write-Host "  2. Wait for the Cloudflare Pages build to finish (site is live)." -ForegroundColor Green
+Write-Host "  3. pwsh -File .\submit-indexnow.ps1   # ping Bing/IndexNow to crawl the updates" -ForegroundColor Green
+Write-Host "     (or pass -Url '<changed-url>',... to submit only changed pages)" -ForegroundColor Green

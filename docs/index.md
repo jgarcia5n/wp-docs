@@ -1,7 +1,6 @@
 # Workday Documentation Index
 
-> **Description:** AI-optimized reference index for Workday documentation converted from source materials.
-> Each section is namespace-isolated by Workday functional area/module to support clean merging across documentation sets.
+> **Description:** Each section is namespace-isolated by Workday functional area/module to support clean merging across documentation sets.
 
 
 ## Workday HCM – Admin Guide (May 2026)
